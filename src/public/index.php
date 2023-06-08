@@ -7,17 +7,19 @@ $pdo = new PDO(
     $dbPassword
 );
 
-// 検索ワードの取得
-$keyword = isset($_GET['keyword']) ? $_GET['keyword'] : '';
+$order = isset($_GET['order']) ? $_GET['order'] : 'desc'; // デフォ
+$sql = 'SELECT * FROM pages';
 
-if (!empty($keyword)) {
-  $stmt = $pdo->prepare("SELECT * FROM pages WHERE name LIKE :keyword OR contents LIKE :keyword");
-  $stmt->bindValue(':keyword', "%$keyword%", PDO::PARAM_STR);
+// ラジオボタンの選択状態に応じて
+if ($order === 'asc') {
+    $sql .= ' ORDER BY created_at ASC'; // 作成日時の昇順で並び替え
 } else {
-  $stmt = $pdo->prepare("SELECT * FROM pages");
+    $sql .= ' ORDER BY created_at DESC'; // 作成日時の降順（新着順）で並び替え（デフォ）
 }
-$stmt->execute();
-$pages = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$statement = $pdo->prepare($sql);
+$statement->execute();
+$pages = $statement->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -33,14 +35,6 @@ $pages = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <body>
   <div>
     <div>
-      <div>
-        <form method="GET" action="">
-          <p>絞り込み検索</p>
-          <input type="text" name="keyword" placeholder="キーワードを入力" value="<?php echo htmlspecialchars($keyword, ENT_QUOTES); ?>">
-          <button type="submit">検索</button>
-        </form>
-      </div>
-      
       <form action="index.php" method="get">
         <div>
           <label>
