@@ -8,13 +8,22 @@ $pdo = new PDO(
 );
 
 $sql = 'SELECT * FROM pages';
-$statement = $pdo->prepare($sql);
-$statement->bindValue(':title', $title, PDO::PARAM_STR);
-$statement->bindValue(':content', $content, PDO::PARAM_STR);
 
+// ラジオボタンの選択状態に応じてクエリを修正
+if (isset($_GET['order']) && $_GET['order'] === 'asc') {
+    $sql .= ' ORDER BY created_at ASC'; // 作成日時の昇順で並び替え
+} else {
+    $sql .= ' ORDER BY created_at DESC'; // 作成日時の降順（新着順）で並び替え（デフォルト）
+}
+
+$statement = $pdo->prepare($sql);
 $statement->execute();
 $pages = $statement->fetchAll(PDO::FETCH_ASSOC);
 ?>
+
+
+
+
 
 <!DOCTYPE html>
 <html lang="ja">
