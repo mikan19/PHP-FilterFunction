@@ -6,11 +6,22 @@ $pdo = new PDO(
     $dbUserName,
     $dbPassword
 );
+//検索ワードの取得
+$keyword = isset($_GET['keyword']) ? $_GET['keyword'] : '';
 
+// クエリの基本形を定義
 $sql = 'SELECT * FROM pages';
+
+// 日付が指定された場合はクエリに日付の条件を追加
+if (!empty($keyword)) {
+  $sql .= ' WHERE DATE(created_at) = :keyword'; // 作成日の日付が一致する条件を追加
+}
 $statement = $pdo->prepare($sql);
-$statement->bindValue(':title', $title, PDO::PARAM_STR);
-$statement->bindValue(':content', $content, PDO::PARAM_STR);
+
+if (!empty($keyword)) {
+    $statement->bindValue(':keyword', $keyword, PDO::PARAM_STR); // 日付のバインド値を設定
+}
+
 $statement->execute();
 $pages = $statement->fetchAll(PDO::FETCH_ASSOC);
 ?>
@@ -26,6 +37,15 @@ $pages = $statement->fetchAll(PDO::FETCH_ASSOC);
 </head>
 
 <body>
+
+<div>
+    <form method="GET" action="">
+        <p>絞り込み検索</p>
+        <input type="date" name="keyword" placeholder="日付を入力" value="<?php echo htmlspecialchars($keyword, ENT_QUOTES); ?>">
+        <button type="submit">検索</button>
+    </form>
+</div>
+
   <div>
     <div>
       <form action="index.php" method="get">
